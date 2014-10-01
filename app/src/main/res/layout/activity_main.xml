@@ -7,7 +7,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    tools:context="com.firebase.samples.simplelogindemo.MainActivity">
+    tools:context="com.firebase.samples.logindemo.MainActivity">
 
     <TextView
             android:id="@+id/login_status"
@@ -32,6 +32,18 @@
             android:text="@string/login_with_google"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+    <Button
+            android:id="@+id/login_with_twitter"
+            android:text="@string/login_with_twitter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    <Button
+            android:id="@+id/login_with_password"
+            android:text="@string/login_with_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
     <Button
             android:id="@+id/login_anonymously"

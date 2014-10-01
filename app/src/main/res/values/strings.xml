@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Simple Login Demo</string>
+    <string name="app_name">Firebase Login Demo</string>
     <string name="action_settings">Settings</string>
     <string name="login_with_facebook">Login with Facebook</string>
     <string name="login_with_google">Login with Google+</string>
     <string name="login_with_twitter">Login with Twitter</string>
+    <string name="login_with_password">Login with Password</string>
     <string name="login_anonymously">Login Anonymously</string>
     <string name="action_logout">Logout</string>
 
     <!-- In order for this demo to work you need to provide your own Firebase, API keys and App IDs -->
     <string name="firebase_url">https://[your-firebase].firebaseio.com</string>
-    <string name="facebook_app_id">[your-facebook-app-id]</string>
 
+    <!-- https://developers.facebook.com/ -->
+    <string name="facebook_app_id">[your-facebook-app-id]</string>
+    <!-- https://apps.twitter.com/ -->
+    <string name="twitter_consumer_key">[your-twitter-consumer-key]</string>
+    <string name="twitter_consumer_secret">[your-twitter-consumer-secret]</string>
 </resources>
