@@ -312,11 +312,10 @@ public class MainActivity extends ActionBarActivity implements
      * necessary parameters depending on the provider)
      */
     private void authWithFirebase(final String provider, Map<String, String> options) {
-        mAuthProgressDialog.show();
         if (options.containsKey("error")) {
-            mAuthProgressDialog.hide();
             showErrorDialog(options.get("error"));
         } else {
+            mAuthProgressDialog.show();
             if (provider.equals("twitter")) {
                 // if the provider is twitter, we pust pass in additional options, so use the options endpoint
                 ref.authWithOAuthToken(provider, options, new AuthResultHandler(provider));
@@ -393,16 +392,14 @@ public class MainActivity extends ActionBarActivity implements
 
         @Override
         public void onAuthenticated(AuthData authData) {
-            if (authData != null) {
-                Log.i(TAG, provider + " auth successful");
-                setAuthenticatedUser(authData);
-            } else {
-                Log.w(TAG, provider + " auth failed.");
-            }
+            mAuthProgressDialog.hide();
+            Log.i(TAG, provider + " auth successful");
+            setAuthenticatedUser(authData);
         }
 
         @Override
         public void onAuthenticationError(FirebaseError firebaseError) {
+            mAuthProgressDialog.hide();
             showErrorDialog(firebaseError.toString());
         }
     }
