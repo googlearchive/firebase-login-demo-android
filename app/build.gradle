@@ -10,7 +10,6 @@ apply plugin: 'com.android.application'
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 android {
@@ -39,7 +38,7 @@ android {
 }
 
 dependencies {
-    compile 'com.firebase:firebase-client-android:1.0.19-SNAPSHOT'
+    compile 'com.firebase:firebase-client-android:1.1.0+'
     compile 'com.android.support:appcompat-v7:20.0.0'
     compile 'com.google.android.gms:play-services:5.0.89'
     compile 'org.twitter4j:twitter4j-core:4.0.2'
