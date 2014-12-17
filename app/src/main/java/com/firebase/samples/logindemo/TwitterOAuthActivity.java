@@ -67,6 +67,7 @@ public class TwitterOAuthActivity extends Activity {
                 }
                 return token;
             }
+
             @Override
             protected void onPostExecute(final RequestToken token) {
                 mTwitterView.setWebViewClient(new WebViewClient() {
@@ -95,12 +96,13 @@ public class TwitterOAuthActivity extends Activity {
                 }
                 return accessToken;
             }
+
             @Override
             protected void onPostExecute(AccessToken token) {
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("oauth_token", token.getToken());
                 resultIntent.putExtra("oauth_token_secret", token.getTokenSecret());
-                resultIntent.putExtra("user_id", token.getUserId()+"");
+                resultIntent.putExtra("user_id", token.getUserId() + "");
                 setResult(MainActivity.RC_TWITTER_LOGIN, resultIntent);
                 finish();
             }

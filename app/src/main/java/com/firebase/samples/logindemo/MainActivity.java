@@ -43,7 +43,7 @@ import java.util.Map;
  * Facebook provides its own API via the {@link com.facebook.widget.LoginButton}.
  * Google provides its own API via the {@link com.google.android.gms.common.api.GoogleApiClient}.
  * Twitter requires us to use a Web View to authenticate, see
- *      {@link com.firebase.samples.logindemo.TwitterOAuthActivity}
+ * {@link com.firebase.samples.logindemo.TwitterOAuthActivity}
  * Email/Password is provided using {@link com.firebase.client.Firebase}
  * Anonymous is provided using {@link com.firebase.client.Firebase}
  */
@@ -53,9 +53,11 @@ public class MainActivity extends ActionBarActivity implements
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    /***************************************
-     *               GENERAL               *
-     ***************************************/
+    /**
+     * ************************************
+     * GENERAL               *
+     * *************************************
+     */
     /* TextView that is used to display information about the logged in user */
     private TextView mLoggedInStatusTextView;
 
@@ -68,15 +70,19 @@ public class MainActivity extends ActionBarActivity implements
     /* Data from the authenticated user */
     private AuthData mAuthData;
 
-    /***************************************
-     *              FACEBOOK               *
-     ***************************************/
+    /**
+     * ************************************
+     * FACEBOOK               *
+     * *************************************
+     */
     /* The login button for Facebook */
     private LoginButton mFacebookLoginButton;
 
-    /***************************************
-     *               GOOGLE                *
-     ***************************************/
+    /**
+     * ************************************
+     * GOOGLE                *
+     * *************************************
+     */
     /* Request code used to invoke sign in user interactions for Google+ */
     public static final int RC_GOOGLE_LOGIN = 1;
 
@@ -97,21 +103,27 @@ public class MainActivity extends ActionBarActivity implements
     /* The login button for Google */
     private SignInButton mGoogleLoginButton;
 
-    /***************************************
-     *                TWITTER              *
-     ***************************************/
+    /**
+     * ************************************
+     * TWITTER              *
+     * *************************************
+     */
     public static final int RC_TWITTER_LOGIN = 2;
 
     private Button mTwitterLoginButton;
 
-    /***************************************
-     *               PASSWORD              *
-     ***************************************/
+    /**
+     * ************************************
+     * PASSWORD              *
+     * *************************************
+     */
     private Button mPasswordLoginButton;
 
-    /***************************************
-     *              ANONYMOUSLY            *
-     ***************************************/
+    /**
+     * ************************************
+     * ANONYMOUSLY            *
+     * *************************************
+     */
     private Button mAnonymousLoginButton;
 
     @Override
@@ -124,7 +136,7 @@ public class MainActivity extends ActionBarActivity implements
          *              FACEBOOK               *
          ***************************************/
         /* Load the Facebook login button and set up the session callback */
-        mFacebookLoginButton = (LoginButton)findViewById(R.id.login_with_facebook);
+        mFacebookLoginButton = (LoginButton) findViewById(R.id.login_with_facebook);
         mFacebookLoginButton.setSessionStatusCallback(new Session.StatusCallback() {
             @Override
             public void call(Session session, SessionState state, Exception exception) {
@@ -136,7 +148,7 @@ public class MainActivity extends ActionBarActivity implements
          *               GOOGLE                *
          ***************************************/
         /* Load the Google login button */
-        mGoogleLoginButton = (SignInButton)findViewById(R.id.login_with_google);
+        mGoogleLoginButton = (SignInButton) findViewById(R.id.login_with_google);
         mGoogleLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -165,7 +177,7 @@ public class MainActivity extends ActionBarActivity implements
         /***************************************
          *                TWITTER              *
          ***************************************/
-        mTwitterLoginButton = (Button)findViewById(R.id.login_with_twitter);
+        mTwitterLoginButton = (Button) findViewById(R.id.login_with_twitter);
         mTwitterLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -176,7 +188,7 @@ public class MainActivity extends ActionBarActivity implements
         /***************************************
          *               PASSWORD              *
          ***************************************/
-        mPasswordLoginButton = (Button)findViewById(R.id.login_with_password);
+        mPasswordLoginButton = (Button) findViewById(R.id.login_with_password);
         mPasswordLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -188,7 +200,7 @@ public class MainActivity extends ActionBarActivity implements
          *              ANONYMOUSLY            *
          ***************************************/
         /* Load and setup the anonymous login button */
-        mAnonymousLoginButton = (Button)findViewById(R.id.login_anonymously);
+        mAnonymousLoginButton = (Button) findViewById(R.id.login_anonymously);
         mAnonymousLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -199,7 +211,7 @@ public class MainActivity extends ActionBarActivity implements
         /***************************************
          *               GENERAL               *
          ***************************************/
-        mLoggedInStatusTextView = (TextView)findViewById(R.id.login_status);
+        mLoggedInStatusTextView = (TextView) findViewById(R.id.login_status);
 
         /* Create the Firebase ref that is used for all authentication with Firebase */
         mFirebaseRef = new Firebase(getResources().getString(R.string.firebase_url));
@@ -338,11 +350,11 @@ public class MainActivity extends ActionBarActivity implements
             /* show a provider specific status text */
             String name = null;
             if (authData.getProvider().equals("facebook")
-                || authData.getProvider().equals("google")
-                || authData.getProvider().equals("twitter")) {
-                name = (String)authData.getProviderData().get("displayName");
+                    || authData.getProvider().equals("google")
+                    || authData.getProvider().equals("twitter")) {
+                name = (String) authData.getProviderData().get("displayName");
             } else if (authData.getProvider().equals("anonymous")
-                       || authData.getProvider().equals("password")) {
+                    || authData.getProvider().equals("password")) {
                 name = authData.getUid();
             } else {
                 Log.e(TAG, "Invalid provider: " + authData.getProvider());
@@ -401,9 +413,11 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    /***************************************
-     *              FACEBOOK               *
-     ***************************************/
+    /**
+     * ************************************
+     * FACEBOOK               *
+     * *************************************
+     */
     /* Handle any changes to the Facebook session */
     private void onFacebookSessionStateChange(Session session, SessionState state, Exception exception) {
         if (state.isOpened()) {
@@ -419,9 +433,11 @@ public class MainActivity extends ActionBarActivity implements
     }
 
 
-    /***************************************
-     *               GOOGLE                *
-     ***************************************/
+    /**
+     * ************************************
+     * GOOGLE                *
+     * *************************************
+     */
     /* A helper method to resolve the current ConnectionResult error. */
     private void resolveSignInError() {
         if (mGoogleConnectionResult.hasResolution()) {
@@ -442,6 +458,7 @@ public class MainActivity extends ActionBarActivity implements
         /* Get OAuth token in Background */
         AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
             String errorMessage = null;
+
             @Override
             protected String doInBackground(Void... params) {
                 String token = null;
@@ -513,24 +530,30 @@ public class MainActivity extends ActionBarActivity implements
         // ignore
     }
 
-    /***************************************
-     *                TWITTER              *
-     ***************************************/
+    /**
+     * ************************************
+     * TWITTER              *
+     * *************************************
+     */
     private void loginWithTwitter() {
         startActivityForResult(new Intent(this, TwitterOAuthActivity.class), RC_TWITTER_LOGIN);
     }
 
-    /***************************************
-     *               PASSWORD              *
-     ***************************************/
+    /**
+     * ************************************
+     * PASSWORD              *
+     * *************************************
+     */
     public void loginWithPassword() {
         mAuthProgressDialog.show();
         mFirebaseRef.authWithPassword("test@firebaseuser.com", "test1234", new AuthResultHandler("password"));
     }
 
-    /***************************************
-     *              ANONYMOUSLY            *
-     ***************************************/
+    /**
+     * ************************************
+     * ANONYMOUSLY            *
+     * *************************************
+     */
     private void loginAnonymously() {
         mAuthProgressDialog.show();
         mFirebaseRef.authAnonymously(new AuthResultHandler("anonymous"));

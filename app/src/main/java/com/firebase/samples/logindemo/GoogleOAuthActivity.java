@@ -85,6 +85,7 @@ public class GoogleOAuthActivity extends Activity implements
         /* Get OAuth token in Background */
         AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
             String errorMessage = null;
+
             @Override
             protected String doInBackground(Void... params) {
                 String token = null;
