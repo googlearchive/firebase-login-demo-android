@@ -53,11 +53,9 @@ public class MainActivity extends ActionBarActivity implements
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    /**
-     * ************************************
-     * GENERAL               *
-     * *************************************
-     */
+    /* *************************************
+     *              GENERAL                *
+     ***************************************/
     /* TextView that is used to display information about the logged in user */
     private TextView mLoggedInStatusTextView;
 
@@ -70,19 +68,15 @@ public class MainActivity extends ActionBarActivity implements
     /* Data from the authenticated user */
     private AuthData mAuthData;
 
-    /**
-     * ************************************
-     * FACEBOOK               *
-     * *************************************
-     */
+    /* *************************************
+     *              FACEBOOK               *
+     ***************************************/
     /* The login button for Facebook */
     private LoginButton mFacebookLoginButton;
 
-    /**
-     * ************************************
-     * GOOGLE                *
-     * *************************************
-     */
+    /* *************************************
+     *              GOOGLE                 *
+     ***************************************/
     /* Request code used to invoke sign in user interactions for Google+ */
     public static final int RC_GOOGLE_LOGIN = 1;
 
@@ -103,27 +97,21 @@ public class MainActivity extends ActionBarActivity implements
     /* The login button for Google */
     private SignInButton mGoogleLoginButton;
 
-    /**
-     * ************************************
-     * TWITTER              *
-     * *************************************
-     */
+    /* *************************************
+     *              TWITTER                *
+     ***************************************/
     public static final int RC_TWITTER_LOGIN = 2;
 
     private Button mTwitterLoginButton;
 
-    /**
-     * ************************************
-     * PASSWORD              *
-     * *************************************
-     */
+    /* *************************************
+     *              PASSWORD               *
+     ***************************************/
     private Button mPasswordLoginButton;
 
-    /**
-     * ************************************
-     * ANONYMOUSLY            *
-     * *************************************
-     */
+    /* *************************************
+     *            ANONYMOUSLY              *
+     ***************************************/
     private Button mAnonymousLoginButton;
 
     @Override
@@ -132,7 +120,7 @@ public class MainActivity extends ActionBarActivity implements
         /* Load the view and display it */
         setContentView(R.layout.activity_main);
 
-        /***************************************
+        /* *************************************
          *              FACEBOOK               *
          ***************************************/
         /* Load the Facebook login button and set up the session callback */
@@ -144,7 +132,7 @@ public class MainActivity extends ActionBarActivity implements
             }
         });
 
-        /***************************************
+        /* *************************************
          *               GOOGLE                *
          ***************************************/
         /* Load the Google login button */
@@ -174,7 +162,7 @@ public class MainActivity extends ActionBarActivity implements
                 .addScope(Plus.SCOPE_PLUS_LOGIN)
                 .build();
 
-        /***************************************
+        /* *************************************
          *                TWITTER              *
          ***************************************/
         mTwitterLoginButton = (Button) findViewById(R.id.login_with_twitter);
@@ -185,7 +173,7 @@ public class MainActivity extends ActionBarActivity implements
             }
         });
 
-        /***************************************
+        /* *************************************
          *               PASSWORD              *
          ***************************************/
         mPasswordLoginButton = (Button) findViewById(R.id.login_with_password);
@@ -196,7 +184,7 @@ public class MainActivity extends ActionBarActivity implements
             }
         });
 
-        /***************************************
+        /* *************************************
          *              ANONYMOUSLY            *
          ***************************************/
         /* Load and setup the anonymous login button */
@@ -208,7 +196,7 @@ public class MainActivity extends ActionBarActivity implements
             }
         });
 
-        /***************************************
+        /* *************************************
          *               GENERAL               *
          ***************************************/
         mLoggedInStatusTextView = (TextView) findViewById(R.id.login_status);
@@ -413,10 +401,9 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    /**
-     * ************************************
-     * FACEBOOK               *
-     * *************************************
+    /* ************************************
+     *             FACEBOOK               *
+     **************************************
      */
     /* Handle any changes to the Facebook session */
     private void onFacebookSessionStateChange(Session session, SessionState state, Exception exception) {
@@ -433,10 +420,9 @@ public class MainActivity extends ActionBarActivity implements
     }
 
 
-    /**
-     * ************************************
-     * GOOGLE                *
-     * *************************************
+    /* ************************************
+     *              GOOGLE                *
+     **************************************
      */
     /* A helper method to resolve the current ConnectionResult error. */
     private void resolveSignInError() {
@@ -530,29 +516,26 @@ public class MainActivity extends ActionBarActivity implements
         // ignore
     }
 
-    /**
-     * ************************************
-     * TWITTER              *
-     * *************************************
+    /* ************************************
+     *               TWITTER              *
+     **************************************
      */
     private void loginWithTwitter() {
         startActivityForResult(new Intent(this, TwitterOAuthActivity.class), RC_TWITTER_LOGIN);
     }
 
-    /**
-     * ************************************
-     * PASSWORD              *
-     * *************************************
+    /* ************************************
+     *              PASSWORD              *
+     **************************************
      */
     public void loginWithPassword() {
         mAuthProgressDialog.show();
         mFirebaseRef.authWithPassword("test@firebaseuser.com", "test1234", new AuthResultHandler("password"));
     }
 
-    /**
-     * ************************************
-     * ANONYMOUSLY            *
-     * *************************************
+    /* ************************************
+     *             ANONYMOUSLY            *
+     **************************************
      */
     private void loginAnonymously() {
         mAuthProgressDialog.show();
