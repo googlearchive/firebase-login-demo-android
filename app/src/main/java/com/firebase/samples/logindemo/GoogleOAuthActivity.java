@@ -25,7 +25,7 @@ public class GoogleOAuthActivity extends Activity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    private static final String TAG = "GoogleOAuthActivity";
+    private static final String TAG = GoogleOAuthActivity.class.getSimpleName();
 
     /* Client used to interact with Google APIs. */
     private GoogleApiClient mGoogleApiClient;
@@ -169,5 +169,4 @@ public class GoogleOAuthActivity extends Activity implements
             mGoogleApiClient.connect();
         }
     }
-
 }
