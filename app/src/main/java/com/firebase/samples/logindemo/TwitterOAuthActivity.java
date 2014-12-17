@@ -27,7 +27,7 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 public class TwitterOAuthActivity extends Activity {
 
-    private static final String TAG = "TwitterOAuthActivity";
+    private static final String TAG = TwitterOAuthActivity.class.getSimpleName();
 
     private WebView mTwitterView;
 
