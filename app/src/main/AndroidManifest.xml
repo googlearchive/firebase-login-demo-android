@@ -13,7 +13,7 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
 
         <activity
             android:name=".MainActivity"
@@ -24,9 +24,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".TwitterOAuthActivity"/>
+        <activity android:name=".TwitterOAuthActivity" />
 
-        <activity android:name="com.facebook.LoginActivity"/>
+        <activity android:name="com.facebook.LoginActivity" />
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
