@@ -43,5 +43,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:20.0.0'
     compile 'com.google.android.gms:play-services:5.0.89'
     compile 'org.twitter4j:twitter4j-core:4.0.2'
-    compile project(':sdk:facebook')
+    compile 'com.facebook.android:facebook-android-sdk:4.1.0'
 }
