@@ -18,7 +18,7 @@
         android:textAlignment="center"
         android:layout_marginTop="20dp" />
 
-    <com.facebook.widget.LoginButton
+    <com.facebook.login.widget.LoginButton
         android:id="@+id/login_with_facebook"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

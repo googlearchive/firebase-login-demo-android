@@ -14,9 +14,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.widget.LoginButton;
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.CallbackManager;
+import com.facebook.login.LoginManager;
+import com.facebook.login.widget.LoginButton;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -40,7 +42,7 @@ import java.util.Map;
  * The methods in this class have been divided into sections based on providers (with a few
  * general methods).
  * <p/>
- * Facebook provides its own API via the {@link com.facebook.widget.LoginButton}.
+ * Facebook provides its own API via the {@link com.facebook.login.widget.LoginButton}.
  * Google provides its own API via the {@link com.google.android.gms.common.api.GoogleApiClient}.
  * Twitter requires us to use a Web View to authenticate, see
  * {@link com.firebase.samples.logindemo.TwitterOAuthActivity}
@@ -73,6 +75,11 @@ public class MainActivity extends ActionBarActivity implements
      ***************************************/
     /* The login button for Facebook */
     private LoginButton mFacebookLoginButton;
+    /* The callback manager for Facebook */
+    private CallbackManager mFacebookCallbackManager;
+    /* Used to track user logging in/out off Facebook */
+    private AccessTokenTracker mFacebookAccessTokenTracker;
+
 
     /* *************************************
      *              GOOGLE                 *
@@ -123,14 +130,16 @@ public class MainActivity extends ActionBarActivity implements
         /* *************************************
          *              FACEBOOK               *
          ***************************************/
-        /* Load the Facebook login button and set up the session callback */
+        /* Load the Facebook login button and set up the tracker to monitor access token changes */
+        mFacebookCallbackManager = CallbackManager.Factory.create();
         mFacebookLoginButton = (LoginButton) findViewById(R.id.login_with_facebook);
-        mFacebookLoginButton.setSessionStatusCallback(new Session.StatusCallback() {
+        mFacebookAccessTokenTracker = new AccessTokenTracker() {
             @Override
-            public void call(Session session, SessionState state, Exception exception) {
-                onFacebookSessionStateChange(session, state, exception);
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+                Log.i(TAG, "Facebook.AccessTokenTracker.OnCurrentAccessTokenChanged");
+                MainActivity.this.onFacebookAccessTokenChange(currentAccessToken);
             }
-        });
+        };
 
         /* *************************************
          *               GOOGLE                *
@@ -222,6 +231,15 @@ public class MainActivity extends ActionBarActivity implements
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // if user logged in with Facebook, stop tracking their token
+        if (mFacebookAccessTokenTracker != null) {
+            mFacebookAccessTokenTracker.stopTracking();
+        }
+    }
+
     /**
      * This method fires when any startActivityForResult finishes. The requestCode maps to
      * the value passed into startActivityForResult.
@@ -246,7 +264,7 @@ public class MainActivity extends ActionBarActivity implements
             authWithFirebase("twitter", options);
         } else {
             /* Otherwise, it's probably the request by the Facebook login button, keep track of the session */
-            Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+            mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -282,16 +300,7 @@ public class MainActivity extends ActionBarActivity implements
              * Facebook/Google+ after logging out of Firebase. */
             if (this.mAuthData.getProvider().equals("facebook")) {
                 /* Logout from Facebook */
-                Session session = Session.getActiveSession();
-                if (session != null) {
-                    if (!session.isClosed()) {
-                        session.closeAndClearTokenInformation();
-                    }
-                } else {
-                    session = new Session(getApplicationContext());
-                    Session.setActiveSession(session);
-                    session.closeAndClearTokenInformation();
-                }
+                LoginManager.getInstance().logOut();
             } else if (this.mAuthData.getProvider().equals("google")) {
                 /* Logout from Google+ */
                 if (mGoogleApiClient.isConnected()) {
@@ -405,20 +414,18 @@ public class MainActivity extends ActionBarActivity implements
      *             FACEBOOK               *
      **************************************
      */
-    /* Handle any changes to the Facebook session */
-    private void onFacebookSessionStateChange(Session session, SessionState state, Exception exception) {
-        if (state.isOpened()) {
+    private void onFacebookAccessTokenChange(AccessToken token) {
+        if (token != null) {
             mAuthProgressDialog.show();
-            mFirebaseRef.authWithOAuthToken("facebook", session.getAccessToken(), new AuthResultHandler("facebook"));
-        } else if (state.isClosed()) {
-            /* Logged out of Facebook and currently authenticated with Firebase using Facebook, so do a logout */
+            mFirebaseRef.authWithOAuthToken("facebook", token.getToken(), new AuthResultHandler("facebook"));
+        } else {
+            // Logged out of Facebook and currently authenticated with Firebase using Facebook, so do a logout
             if (this.mAuthData != null && this.mAuthData.getProvider().equals("facebook")) {
                 mFirebaseRef.unauth();
                 setAuthenticatedUser(null);
             }
         }
     }
-
 
     /* ************************************
      *              GOOGLE                *
