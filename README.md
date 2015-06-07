@@ -1,21 +1,20 @@
-# Firebase Login Demo for Android
+# Firebase Login Demo for Android with custom authentication
 
-This demo Android app demonstrates authenticating with Firebase Login for Facebook, Google, Twitter,
-email & password, and anonymous.
+## これはなんですか？
 
-![screenshot showing authentication provider buttons](/screenshot.png)
+これは大元の firebase login sample(https://github.com/firebase/firebase-login-demo-android)に
+custom authentication を追加したものです。
 
-### Setup
-0. Sign up and create a new [Firebase](https://www.firebase.com).
-0. Create apps for each provider on their developer consoles. See the Firebase
-   [authentication provider docs](https://www.firebase.com/docs/android/guide/user-auth.html#section-providers)
-   for more details.
-    - [Facebook](https://developers.facebook.com/docs/android/getting-started)
-    - [Google](https://developers.google.com/+/mobile/android/getting-started)
-    - [Twitter](https://apps.twitter.com/app/new)
-0. Enable Facebook, Google, Twitter, Email, and Anonymous providers on the Firebase Dashboard for
-   your app. See the
-   [enabling providers section](https://www.firebase.com/docs/android/guide/user-auth.html#section-enable-providers)
-   of the Firebase user authentication docs for more details.
-0. Populate all of the values in [`res/values/keys.xml`](/app/src/main/res/values/keys.xml).
+## custom authentication はどんなところが便利なの？
 
+custom authentication　は自分たちで運営しているサービスの認証機能を使ってfirebaseを操作することができます。
+分かりやすいイメージだと自分たちで運営しているサービスのユーザーIDがそのままfirebaseでも使えると思って下さい。
+
+firebase に標準でついているソーシャルログイン機能は１サービス１アカウントなので、
+１つのアカウントですべてのソーシャルログインを使いたい場合に便利です。
+
+## 使い方
+
+https://github.com/firebase/firebase-login-demo-android のREADMEに書いてある手順に設定をした後
+[`res/values/keys.xml`](/app/src/main/res/values/keys.xml) にある your-firebase-secret の値を
+firebaseのadmin画面->左メニューのsecrets上にある secret key の値にしてください。

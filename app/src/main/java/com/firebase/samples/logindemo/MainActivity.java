@@ -22,6 +22,7 @@ import com.facebook.login.widget.LoginButton;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.security.token.TokenGenerator;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -121,6 +122,13 @@ public class MainActivity extends ActionBarActivity implements
      ***************************************/
     private Button mAnonymousLoginButton;
 
+    /* *************************************
+     *            CUSTOMAUTH              *
+     ***************************************/
+    private Button mCustomLoginButton;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -202,6 +210,18 @@ public class MainActivity extends ActionBarActivity implements
             @Override
             public void onClick(View view) {
                 loginAnonymously();
+            }
+        });
+
+        /* *************************************
+         *              CUSTOM                 *
+         ***************************************/
+        /* Load and setup the anonymous login button */
+        mCustomLoginButton = (Button) findViewById(R.id.login_with_custom);
+        mCustomLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loginCustomauth();
             }
         });
 
@@ -343,6 +363,7 @@ public class MainActivity extends ActionBarActivity implements
             mTwitterLoginButton.setVisibility(View.GONE);
             mPasswordLoginButton.setVisibility(View.GONE);
             mAnonymousLoginButton.setVisibility(View.GONE);
+            mCustomLoginButton.setVisibility(View.GONE);
             mLoggedInStatusTextView.setVisibility(View.VISIBLE);
             /* show a provider specific status text */
             String name = null;
@@ -351,7 +372,8 @@ public class MainActivity extends ActionBarActivity implements
                     || authData.getProvider().equals("twitter")) {
                 name = (String) authData.getProviderData().get("displayName");
             } else if (authData.getProvider().equals("anonymous")
-                    || authData.getProvider().equals("password")) {
+                    || authData.getProvider().equals("password")
+                    || authData.getProvider().equals("custom")) {
                 name = authData.getUid();
             } else {
                 Log.e(TAG, "Invalid provider: " + authData.getProvider());
@@ -366,7 +388,10 @@ public class MainActivity extends ActionBarActivity implements
             mTwitterLoginButton.setVisibility(View.VISIBLE);
             mPasswordLoginButton.setVisibility(View.VISIBLE);
             mAnonymousLoginButton.setVisibility(View.VISIBLE);
+            mCustomLoginButton.setVisibility(View.VISIBLE);
             mLoggedInStatusTextView.setVisibility(View.GONE);
+
+
         }
         this.mAuthData = authData;
         /* invalidate options menu to hide/show the logout button */
@@ -548,4 +573,25 @@ public class MainActivity extends ActionBarActivity implements
         mAuthProgressDialog.show();
         mFirebaseRef.authAnonymously(new AuthResultHandler("anonymous"));
     }
+
+
+    /* ************************************
+     *             CUSTOM            *
+     **************************************
+     */
+    private void loginCustomauth() {
+        mAuthProgressDialog.show();
+
+        String firebaseSecret = getResources().getString(R.string.firebase_secret);
+
+        Map<String, Object> payload = new HashMap<String, Object>();
+        payload.put("uid", "custom:1");
+        payload.put("some", "arbitrary");
+        payload.put("data", "here");
+        TokenGenerator tokenGenerator = new TokenGenerator(firebaseSecret);
+        String token = tokenGenerator.createToken(payload);
+
+        mFirebaseRef.authWithCustomToken(token, new AuthResultHandler("custom"));
+    }
+
 }
