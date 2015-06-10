@@ -69,6 +69,9 @@ public class MainActivity extends ActionBarActivity implements
 
     /* Data from the authenticated user */
     private AuthData mAuthData;
+    
+    /* Listener for Firebase session changes */
+    private Firebase.AuthStateListener firebaseAuthStateListener;
 
     /* *************************************
      *              FACEBOOK               *
@@ -220,15 +223,16 @@ public class MainActivity extends ActionBarActivity implements
         mAuthProgressDialog.setCancelable(false);
         mAuthProgressDialog.show();
 
-        /* Check if the user is authenticated with Firebase already. If this is the case we can set the authenticated
-         * user and hide hide any login buttons */
-        mFirebaseRef.addAuthStateListener(new Firebase.AuthStateListener() {
+        firebaseAuthStateListener = new Firebase.AuthStateListener() {
             @Override
             public void onAuthStateChanged(AuthData authData) {
                 mAuthProgressDialog.hide();
                 setAuthenticatedUser(authData);
             }
-        });
+        };
+        /* Check if the user is authenticated with Firebase already. If this is the case we can set the authenticated
+         * user and hide hide any login buttons */
+        mFirebaseRef.addAuthStateListener(firebaseAuthStateListener);
     }
 
     @Override
@@ -238,6 +242,9 @@ public class MainActivity extends ActionBarActivity implements
         if (mFacebookAccessTokenTracker != null) {
             mFacebookAccessTokenTracker.stopTracking();
         }
+        
+        // if changing configurations, stop tracking firebase session.
+        mFirebaseRef.removeAuthStateListener(firebaseAuthStateListener);
     }
 
     /**
