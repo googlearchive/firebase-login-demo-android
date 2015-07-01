@@ -57,13 +57,16 @@ public class TwitterOAuthActivity extends Activity {
     private void loginToTwitter() {
         // fetch the oauth request token then prompt the user to authorize the application
         new AsyncTask<Void, Void, RequestToken>() {
+            String errorMessage = null;
+
             @Override
             protected RequestToken doInBackground(Void... params) {
                 RequestToken token = null;
                 try {
                     token = mTwitter.getOAuthRequestToken("oauth://cb");
                 } catch (TwitterException te) {
-                    Log.e(TAG, te.toString());
+                    Log.e(TAG, "Error retrieving request token from Twitter: " + te.getMessage(), te);
+                    errorMessage = "Error retrieving request token from Twitter: " + te.getMessage();
                 }
                 return token;
             }
@@ -74,11 +77,36 @@ public class TwitterOAuthActivity extends Activity {
                     @Override
                     public void onPageFinished(final WebView view, final String url) {
                         if (url.startsWith("oauth://cb")) {
-                            getTwitterOAuthTokenAndLogin(token, Uri.parse(url).getQueryParameter("oauth_verifier"));
+                            if (url.contains("oauth_verifier")) {
+                                try {
+                                    getTwitterOAuthTokenAndLogin(token, Uri.parse(url).getQueryParameter("oauth_verifier"));
+                                } catch (UnsupportedOperationException uoe) {
+                                    Log.e(TAG, "Uri isn't a hierarchical URI: " + uoe.getMessage(), uoe);
+                                    errorMessage = "Uri isn't a hierarchical URI: " + uoe.getMessage();
+                                } catch (NullPointerException npe) {
+                                    Log.e(TAG, "'url' or key to encode 'oauth_verifier' are null: " + npe.getMessage(), npe);
+                                    errorMessage = "'url' or key to encode 'oauth_verifier' are null: " + npe.getMessage();
+                                }
+                            } else if (url.contains("denied")) {
+                                Log.e(TAG, "Access token retrieval denied.");
+                                errorMessage = "Access token retrieval denied.";
+                                Intent resultIntent = new Intent();
+                                resultIntent.putExtra("error", errorMessage);
+                                setResult(RESULT_CANCELED, resultIntent);
+                                finish();
+                            }
                         }
                     }
                 });
-                mTwitterView.loadUrl(token.getAuthorizationURL());
+                if (errorMessage == null) {
+                    mTwitterView.loadUrl(token.getAuthorizationURL() + "&force_login=true");
+                } else {
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("error", errorMessage);
+                    setResult(RESULT_CANCELED, resultIntent);
+                    Log.e(TAG, "Request token retrieval failed.");
+                    finish();
+                }
             }
         }.execute();
     }
@@ -86,24 +114,36 @@ public class TwitterOAuthActivity extends Activity {
     private void getTwitterOAuthTokenAndLogin(final RequestToken requestToken, final String oauthVerifier) {
         // once a user authorizes the application, get the auth token and return to the MainActivity
         new AsyncTask<Void, Void, AccessToken>() {
+            String errorMessage = null;
+
             @Override
             protected AccessToken doInBackground(Void... params) {
                 AccessToken accessToken = null;
-                try {
-                    accessToken = mTwitter.getOAuthAccessToken(requestToken, oauthVerifier);
-                } catch (TwitterException te) {
-                    Log.e(TAG, te.toString());
+                if (requestToken != null) {
+                    try {
+                        accessToken = mTwitter.getOAuthAccessToken(requestToken, oauthVerifier);
+                    } catch (TwitterException te) {
+                        Log.e(TAG, "Error authenticating with Twitter: " + te.getMessage(), te);
+                        errorMessage = "Error authenticating with Twitter: " + te.getMessage();
+                    }
                 }
                 return accessToken;
             }
 
             @Override
-            protected void onPostExecute(AccessToken token) {
+            protected void onPostExecute(AccessToken accessToken) {
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra("oauth_token", token.getToken());
-                resultIntent.putExtra("oauth_token_secret", token.getTokenSecret());
-                resultIntent.putExtra("user_id", token.getUserId() + "");
-                setResult(MainActivity.RC_TWITTER_LOGIN, resultIntent);
+                if (errorMessage == null) {
+                    resultIntent.putExtra("oauth_token", accessToken.getToken());
+                    resultIntent.putExtra("oauth_token_secret", accessToken.getTokenSecret());
+                    resultIntent.putExtra("user_id", accessToken.getUserId() + "");
+                    setResult(RESULT_OK, resultIntent);
+                    Log.i(TAG, "Access token retrieved.");
+                } else {
+                    resultIntent.putExtra("error", errorMessage);
+                    setResult(RESULT_CANCELED, resultIntent);
+                    Log.e(TAG, "Access token retrieval failed.");
+                }
                 finish();
             }
         }.execute();
