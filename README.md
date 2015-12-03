@@ -1,3 +1,5 @@
+* While the code in this repo is still valid, have a look at [FirebaseUI-Android](https://github.com/firebase/FirebaseUI-Android) for a more up to date library that handles Firebase Authentication on Android.*
+
 # Firebase Login Demo for Android
 
 This demo Android app demonstrates authenticating with Firebase Login for Facebook, Google, Twitter,
