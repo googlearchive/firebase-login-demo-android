@@ -3,10 +3,6 @@
     package="com.firebase.samples.logindemo">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- USE_CREDENTIALS is necessary for Google+ login -->
-    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
-    <!-- GET_ACCOUNTS is necessary to display email address of logged in user. This permission is optional -->
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
     <application
         android:name=".LoginDemoApplication"

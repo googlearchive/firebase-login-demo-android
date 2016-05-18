@@ -3,10 +3,9 @@ package com.firebase.samples.logindemo;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,12 +23,15 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.UserRecoverableAuthException;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.plus.Plus;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -49,8 +51,7 @@ import java.util.Map;
  * Email/Password is provided using {@link com.firebase.client.Firebase}
  * Anonymous is provided using {@link com.firebase.client.Firebase}
  */
-public class MainActivity extends ActionBarActivity implements
-        GoogleApiClient.ConnectionCallbacks,
+public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -87,22 +88,11 @@ public class MainActivity extends ActionBarActivity implements
     /* *************************************
      *              GOOGLE                 *
      ***************************************/
-    /* Request code used to invoke sign in user interactions for Google+ */
+    /* Request code used to invoke sign in user interactions for Google */
     public static final int RC_GOOGLE_LOGIN = 1;
 
     /* Client used to interact with Google APIs. */
     private GoogleApiClient mGoogleApiClient;
-
-    /* A flag indicating that a PendingIntent is in progress and prevents us from starting further intents. */
-    private boolean mGoogleIntentInProgress;
-
-    /* Track whether the sign-in button has been clicked so that we know to resolve all issues preventing sign-in
-     * without waiting. */
-    private boolean mGoogleLoginClicked;
-
-    /* Store the connection result from onConnectionFailed callbacks so that we can resolve them when the user clicks
-     * sign-in. */
-    private ConnectionResult mGoogleConnectionResult;
 
     /* The login button for Google */
     private SignInButton mGoogleLoginButton;
@@ -152,26 +142,18 @@ public class MainActivity extends ActionBarActivity implements
         mGoogleLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mGoogleLoginClicked = true;
-                if (!mGoogleApiClient.isConnecting()) {
-                    if (mGoogleConnectionResult != null) {
-                        resolveSignInError();
-                    } else if (mGoogleApiClient.isConnected()) {
-                        getGoogleOAuthTokenAndLogin();
-                    } else {
-                    /* connect API now */
-                        Log.d(TAG, "Trying to connect to Google API");
-                        mGoogleApiClient.connect();
-                    }
-                }
+                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+                startActivityForResult(signInIntent, RC_GOOGLE_LOGIN);
             }
         });
-        /* Setup the Google API object to allow Google+ logins */
+        /* Setup the Google API object to allow Google logins */
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API)
-                .addScope(Plus.SCOPE_PLUS_LOGIN)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
         /* *************************************
@@ -254,15 +236,14 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Map<String, String> options = new HashMap<String, String>();
+        Map<String, String> options = new HashMap<>();
         if (requestCode == RC_GOOGLE_LOGIN) {
             /* This was a request by the Google API */
-            if (resultCode != RESULT_OK) {
-                mGoogleLoginClicked = false;
-            }
-            mGoogleIntentInProgress = false;
-            if (!mGoogleApiClient.isConnecting()) {
-                mGoogleApiClient.connect();
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                GoogleSignInAccount acct = result.getSignInAccount();
+                String emailAddress = acct.getEmail();
+                getGoogleOAuthTokenAndLogin(emailAddress);
             }
         } else if (requestCode == RC_TWITTER_LOGIN) {
             options.put("oauth_token", data.getStringExtra("oauth_token"));
@@ -304,15 +285,19 @@ public class MainActivity extends ActionBarActivity implements
             /* logout of Firebase */
             mFirebaseRef.unauth();
             /* Logout of any of the Frameworks. This step is optional, but ensures the user is not logged into
-             * Facebook/Google+ after logging out of Firebase. */
+             * Facebook/Google after logging out of Firebase. */
             if (this.mAuthData.getProvider().equals("facebook")) {
                 /* Logout from Facebook */
                 LoginManager.getInstance().logOut();
             } else if (this.mAuthData.getProvider().equals("google")) {
-                /* Logout from Google+ */
+                /* Logout from Google */
                 if (mGoogleApiClient.isConnected()) {
-                    Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-                    mGoogleApiClient.disconnect();
+                    Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
+                            new ResultCallback<Status>() {
+                                @Override
+                                public void onResult(Status status) {
+                                }
+                            });
                 }
             }
             /* Update authenticated user and show login buttons */
@@ -438,22 +423,7 @@ public class MainActivity extends ActionBarActivity implements
      *              GOOGLE                *
      **************************************
      */
-    /* A helper method to resolve the current ConnectionResult error. */
-    private void resolveSignInError() {
-        if (mGoogleConnectionResult.hasResolution()) {
-            try {
-                mGoogleIntentInProgress = true;
-                mGoogleConnectionResult.startResolutionForResult(this, RC_GOOGLE_LOGIN);
-            } catch (IntentSender.SendIntentException e) {
-                // The intent was canceled before it was sent.  Return to the default
-                // state and attempt to connect to get an updated ConnectionResult.
-                mGoogleIntentInProgress = false;
-                mGoogleApiClient.connect();
-            }
-        }
-    }
-
-    private void getGoogleOAuthTokenAndLogin() {
+    private void getGoogleOAuthTokenAndLogin(final String emailAddress) {
         mAuthProgressDialog.show();
         /* Get OAuth token in Background */
         AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
@@ -464,20 +434,12 @@ public class MainActivity extends ActionBarActivity implements
                 String token = null;
 
                 try {
-                    String scope = String.format("oauth2:%s", Scopes.PLUS_LOGIN);
-                    token = GoogleAuthUtil.getToken(MainActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient), scope);
+                    String scope = "oauth2:profile email";
+                    token = GoogleAuthUtil.getToken(MainActivity.this, emailAddress, scope);
                 } catch (IOException transientEx) {
                     /* Network or server error */
                     Log.e(TAG, "Error authenticating with Google: " + transientEx);
                     errorMessage = "Network error: " + transientEx.getMessage();
-                } catch (UserRecoverableAuthException e) {
-                    Log.w(TAG, "Recoverable Google OAuth error: " + e.toString());
-                    /* We probably need to ask for permissions, so start the intent if there is none pending */
-                    if (!mGoogleIntentInProgress) {
-                        mGoogleIntentInProgress = true;
-                        Intent recover = e.getIntent();
-                        startActivityForResult(recover, RC_GOOGLE_LOGIN);
-                    }
                 } catch (GoogleAuthException authEx) {
                     /* The call is not ever expected to succeed assuming you have already verified that
                      * Google Play services is installed. */
@@ -489,7 +451,6 @@ public class MainActivity extends ActionBarActivity implements
 
             @Override
             protected void onPostExecute(String token) {
-                mGoogleLoginClicked = false;
                 if (token != null) {
                     /* Successfully got OAuth token, now login with Google */
                     mFirebaseRef.authWithOAuthToken("google", token, new AuthResultHandler("google"));
@@ -503,31 +464,8 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onConnected(final Bundle bundle) {
-        /* Connected with Google API, use this to authenticate with Firebase */
-        getGoogleOAuthTokenAndLogin();
-    }
-
-
-    @Override
     public void onConnectionFailed(ConnectionResult result) {
-        if (!mGoogleIntentInProgress) {
-            /* Store the ConnectionResult so that we can use it later when the user clicks on the Google+ login button */
-            mGoogleConnectionResult = result;
-
-            if (mGoogleLoginClicked) {
-                /* The user has already clicked login so we attempt to resolve all errors until the user is signed in,
-                 * or they cancel. */
-                resolveSignInError();
-            } else {
-                Log.e(TAG, result.toString());
-            }
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        // ignore
+        Log.e(TAG, result.toString());
     }
 
     /* ************************************
