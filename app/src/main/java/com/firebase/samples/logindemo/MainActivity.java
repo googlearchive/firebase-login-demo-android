@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -265,10 +266,14 @@ public class MainActivity extends ActionBarActivity implements
                 mGoogleApiClient.connect();
             }
         } else if (requestCode == RC_TWITTER_LOGIN) {
-            options.put("oauth_token", data.getStringExtra("oauth_token"));
-            options.put("oauth_token_secret", data.getStringExtra("oauth_token_secret"));
-            options.put("user_id", data.getStringExtra("user_id"));
-            authWithFirebase("twitter", options);
+            if (resultCode == RESULT_OK) {
+                options.put("oauth_token", data.getStringExtra("oauth_token"));
+                options.put("oauth_token_secret", data.getStringExtra("oauth_token_secret"));
+                options.put("user_id", data.getStringExtra("user_id"));
+                authWithFirebase("twitter", options);
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(MainActivity.this, "Login canceled.", Toast.LENGTH_SHORT).show();
+            }
         } else {
             /* Otherwise, it's probably the request by the Facebook login button, keep track of the session */
             mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
